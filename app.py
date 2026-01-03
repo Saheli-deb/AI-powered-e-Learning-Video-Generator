@@ -390,14 +390,19 @@ Return ONLY valid JSON array:
 ]
 """
 
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=prompt
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are an expert teacher who creates detailed lesson scripts in JSON format."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7
     )
 
-    raw = response.output_text.strip()
+    raw = response.choices[0].message.content.strip()
     if raw.startswith("```"):
-        raw = raw.split("```")[1]
+        lines = raw.split("\n")
+        raw = "\n".join(lines[1:-1]) if len(lines) > 2 else raw.strip("`")
 
     return json.loads(raw)
 
